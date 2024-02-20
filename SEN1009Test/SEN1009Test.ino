@@ -171,8 +171,8 @@ void loop()
           delay(50);
           noTone(buzzer);
           Serial.println("User is out of position");
-          digitalWrite(ledPin1, HIGH);  // Turn on LED 1
-          digitalWrite(ledPin2, LOW);   // Turn off LED 2
+          digitalWrite(ledPin1, LOW);  // Turn on LED 1
+          digitalWrite(ledPin2, HIGH);   // Turn off LED 2
           digitalWrite(ledPin3, LOW);   // Turn off LED 3
 
           userInFrame = false;
