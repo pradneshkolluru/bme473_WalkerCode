@@ -2,8 +2,9 @@ import requests
 import random
 
 
-server = "http://127.0.0.1:5000"
+#server = "http://127.0.0.1:5000"
 
+server = "http://vcm-35196.vm.duke.edu:5000"
 
 
 
