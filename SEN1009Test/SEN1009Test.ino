@@ -122,7 +122,7 @@ void loop()
   Serial.println(distanceCm); 
 
 
-  if (distanceCm > 74 || distanceCm <70) {
+  if (distanceCm > 76) {
   
     tone(buzzer, 1000);
     delay(50);
