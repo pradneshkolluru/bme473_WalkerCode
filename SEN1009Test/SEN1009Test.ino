@@ -16,6 +16,12 @@ float distanceCm, distanceInch;
 const int ledPin1 = 2;
 const int ledPin2 = 3;
 const int ledPin3 = 5;
+
+float distanceMeasurements[5] = {0, 0, 0, 0, 0};
+int index = 0;
+float baseLineAvg[5] = {0, 0, 0, 0, 0};
+int baseIndex = 0;
+
 // SEN0019 TIMER
 //const int LedDisp = 13;
 
@@ -103,6 +109,8 @@ void setup()
 
 void loop()
 { 
+
+  Serial.println("test");
   digitalWrite(ledPin1, LOW);  // Turn on LED 1
   digitalWrite(ledPin2, LOW);   // Turn off LED 2
   digitalWrite(ledPin3, LOW);   // Turn off LED 2
@@ -116,13 +124,49 @@ void loop()
   delayMicroseconds(10);
   digitalWrite(trigPin, LOW);
   duration = pulseIn(echoPin, HIGH);
+
   distanceCm = duration * 0.034 / 2;
+
+  if (distanceCm < 100){
+
+    distanceMeasurements[index] = distanceCm;
+    index = (index + 1) % 5;
+
+  }
+
   distanceInch = duration * 0.0133 / 2;
   Serial.print("Distance (cm):");
-  Serial.println(distanceCm); 
+   
 
 
-  if (distanceCm > 76) {
+  float avgDistance = average(distanceMeasurements);
+
+  baseLineAvg[baseIndex] = avgDistance;
+  baseIndex = (baseIndex + 1) % 5;
+
+  Serial.println(avgDistance);
+
+  // if (avgDistance > 51 && avgDistance < 100) {
+  
+  //   tone(buzzer, 1000);
+  //   delay(50);
+  //   noTone(buzzer);
+  //   delay(250);
+  //   digitalWrite(ledPin1, HIGH);  // Turn on LED 1
+  //   digitalWrite(ledPin2, LOW);   // Turn off LED 2
+  //   digitalWrite(ledPin3, LOW);   // Turn off LED 2
+
+  // }
+
+  //50
+  float baseline = average(baseLineAvg);
+
+  Serial.println(baseline);
+  Serial.println(g.acceleration.z);
+
+  Serial.println("");
+
+  if (allAboveThreshold(50) && g.acceleration.z > abs(0.01)) {
   
     tone(buzzer, 1000);
     delay(50);
@@ -147,48 +191,48 @@ void loop()
   }
   */
   
-  bool infraredSensorState = digitalRead(InfraredSensorPin);
+  // bool infraredSensorState = digitalRead(InfraredSensorPin);
 
-  // Print the sensor state (for debugging)
-  Serial.println(!infraredSensorState, BIN);
+  // // Print the sensor state (for debugging)
+  // Serial.println(!infraredSensorState, BIN);
 
-  if (infraredSensorState == LOW) {
-    // User is in frame
-    userInFrame = true;
-    userAbsenceStartTime = 0;  // Reset the absence timer
-    noTone(buzzer);
-  } else {
-    // User is not in frame
-    if (userInFrame) {
-      // Check if the absence timer is started
-      if (userAbsenceStartTime == 0) {
-        userAbsenceStartTime = millis();  // Start the absence timer
-      } else {
-        // Check if the absence duration has exceeded the threshold
-        if (millis() - userAbsenceStartTime >= userAbsenceThreshold) {
-          // Notify user absence
-          tone(buzzer, 1000);
-          delay(50);
-          noTone(buzzer);
-          Serial.println("User is out of position");
-          digitalWrite(ledPin1, LOW);  // Turn on LED 1
-          digitalWrite(ledPin2, HIGH);   // Turn off LED 2
-          digitalWrite(ledPin3, LOW);   // Turn off LED 3
+  // if (infraredSensorState == LOW) {
+  //   // User is in frame
+  //   userInFrame = true;
+  //   userAbsenceStartTime = 0;  // Reset the absence timer
+  //   noTone(buzzer);
+  // } else {
+  //   // User is not in frame
+  //   if (userInFrame) {
+  //     // Check if the absence timer is started
+  //     if (userAbsenceStartTime == 0) {
+  //       userAbsenceStartTime = millis();  // Start the absence timer
+  //     } else {
+  //       // Check if the absence duration has exceeded the threshold
+  //       if (millis() - userAbsenceStartTime >= userAbsenceThreshold) {
+  //         // Notify user absence
+  //         tone(buzzer, 1000);
+  //         delay(50);
+  //         noTone(buzzer);
+  //         Serial.println("User is out of position");
+  //         digitalWrite(ledPin1, LOW);  // Turn on LED 1
+  //         digitalWrite(ledPin2, HIGH);   // Turn off LED 2
+  //         digitalWrite(ledPin3, LOW);   // Turn off LED 3
 
-          userInFrame = false;
-        }
-      }
-    } else {
-      // User is still not in frame
-      tone(buzzer, 1000);
-      delay(50);
-      noTone(buzzer);
-      Serial.println("User is out of position");
-      digitalWrite(ledPin1, LOW);  // Turn on LED 1
-      digitalWrite(ledPin2, HIGH);   // Turn off LED 2
-      digitalWrite(ledPin3, LOW);   // Turn off LED 3
-    }
-  }
+  //         userInFrame = false;
+  //       }
+  //     }
+  //   } else {
+  //     // User is still not in frame
+  //     tone(buzzer, 1000);
+  //     delay(50);
+  //     noTone(buzzer);
+  //     Serial.println("User is out of position");
+  //     digitalWrite(ledPin1, LOW);  // Turn on LED 1
+  //     digitalWrite(ledPin2, HIGH);   // Turn off LED 2
+  //     digitalWrite(ledPin3, LOW);   // Turn off LED 3
+  //   }
+  // }
 
 
   
@@ -211,4 +255,22 @@ void loop()
   }
 
   delay(50);
+}
+
+float average (float * array)  // assuming array is int.
+{
+  int len = 5;
+  long sum = 0L ;  // sum will be larger than an item, long for safety.
+  for (int i = 0 ; i < len ; i++)
+    sum += array [i] ;
+  return  ((float) sum) / len ;  // average will be fractional, so float may be appropriate.
+}
+
+bool allAboveThreshold(float threshold) {
+  for (int i = 0; i < 5; i++) {
+    if (distanceMeasurements[i] <= threshold) {
+      return false; // As soon as one measurement is not above the threshold, return false
+    }
+  }
+  return true; // All measurements are above the threshold
 }

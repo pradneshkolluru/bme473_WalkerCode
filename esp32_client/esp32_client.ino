@@ -10,7 +10,9 @@
 
 unsigned long lastTime = 0;
 
-unsigned long timerDelay = 5000;
+unsigned long timerDelay = 10000;
+
+
 
 
 String serverName = "http://vcm-35196.vm.duke.edu:5000/post_lift";
@@ -21,6 +23,8 @@ const char* ssid = "DukeOpen";
 // the setup function runs once when you press reset or power the board
 void setup() {
   // initialize digital pin LED_BUILTIN as an output.
+
+  pinMode(LED_BUILTIN, OUTPUT);
   Serial.begin(9600);
   while (!Serial) ;
 
@@ -42,12 +46,25 @@ void setup() {
  
   Serial.println("Connected to the WiFi network");
 
+  digitalWrite(LED_BUILTIN, HIGH);
+  delay(1000);
+  digitalWrite(LED_BUILTIN, LOW);
+  delay(1000);
+  digitalWrite(LED_BUILTIN, HIGH);
+  delay(1000);
+  digitalWrite(LED_BUILTIN, LOW);
+
 }
 
 // the loop function runs over and over again forever
 void loop() {
   //Send an HTTP POST request every 10 minutes
+
+
+
+
   if ((millis() - lastTime) > timerDelay) {
+
     //Check WiFi connection status
     if(WiFi.status()== WL_CONNECTED){
       WiFiClient client;
