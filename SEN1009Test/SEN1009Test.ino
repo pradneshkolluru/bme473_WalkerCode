@@ -165,9 +165,9 @@ void loop()
 
   Serial.println("");
 
-  // if (allAboveThreshold(38) && g.acceleration.z > abs(0.01)) {
+  if (allAboveThreshold(38) && g.acceleration.z > abs(0.01)) {
 
-  if (distanceCm > 38 && distanceCm < 100 && g.acceleration.z > abs(0.01)) {
+  // if (distanceCm > 38 && distanceCm < 100 && g.acceleration.z > abs(0.01)) {
 
   // if (allAboveThreshold(38)) {
     tone(buzzer, 1000);
