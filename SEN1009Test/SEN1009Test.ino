@@ -17,10 +17,15 @@ const int ledPin1 = 2;
 const int ledPin2 = 3;
 const int ledPin3 = 5;
 
-float distanceMeasurements[5] = {0, 0, 0, 0, 0};
+
+int size = 3;
+
+float* distanceMeasurements = new float[size];
 int index = 0;
-float baseLineAvg[5] = {0, 0, 0, 0, 0};
+float* baseLineAvg = new float[size];
 int baseIndex = 0;
+
+
 
 // SEN0019 TIMER
 //const int LedDisp = 13;
@@ -49,6 +54,11 @@ void setup()
   pinMode(ledPin1, OUTPUT);
   pinMode(ledPin2, OUTPUT);
   pinMode(ledPin3, OUTPUT);
+
+  for (int i = 0; i < size; i++) {
+    distanceMeasurements[i] = 0;
+    baseLineAvg[i] = 0;
+  }
 
 
   //digitalWrite(LedDisp,LOW);
@@ -127,9 +137,11 @@ void loop()
 
   distanceCm = duration * 0.034 / 2;
 
-  if (distanceCm < 100){
+  
 
-    distanceMeasurements[index] = distanceCm;
+  if (distanceCm < 100 and distanceCm > 20){
+
+    distanceMeasurements[index] = (distanceCm, abs(g.acceleration.z));
     index = (index + 1) % 5;
 
   }
@@ -142,32 +154,22 @@ void loop()
   float avgDistance = average(distanceMeasurements);
 
   baseLineAvg[baseIndex] = avgDistance;
-  baseIndex = (baseIndex + 1) % 5;
+  baseIndex = (baseIndex + 1) % size;
 
   Serial.println(avgDistance);
 
-  // if (avgDistance > 51 && avgDistance < 100) {
-  
-  //   tone(buzzer, 1000);
-  //   delay(50);
-  //   noTone(buzzer);
-  //   delay(250);
-  //   digitalWrite(ledPin1, HIGH);  // Turn on LED 1
-  //   digitalWrite(ledPin2, LOW);   // Turn off LED 2
-  //   digitalWrite(ledPin3, LOW);   // Turn off LED 2
-
-  // }
 
   //50
-  float baseline = average(baseLineAvg);
 
-  Serial.println(baseline);
   Serial.println(g.acceleration.z);
 
   Serial.println("");
 
-  if (allAboveThreshold(50) && g.acceleration.z > abs(0.01)) {
-  
+  // if (allAboveThreshold(38) && g.acceleration.z > abs(0.01)) {
+
+  if (distanceCm > 38 && distanceCm < 100 && g.acceleration.z > abs(0.01)) {
+
+  // if (allAboveThreshold(38)) {
     tone(buzzer, 1000);
     delay(50);
     noTone(buzzer);
@@ -259,15 +261,17 @@ void loop()
 
 float average (float * array)  // assuming array is int.
 {
-  int len = 5;
   long sum = 0L ;  // sum will be larger than an item, long for safety.
-  for (int i = 0 ; i < len ; i++)
+  for (int i = 0 ; i < size ; i++)
     sum += array [i] ;
-  return  ((float) sum) / len ;  // average will be fractional, so float may be appropriate.
+  return  ((float) sum) / size ;  // average will be fractional, so float may be appropriate.
 }
 
 bool allAboveThreshold(float threshold) {
-  for (int i = 0; i < 5; i++) {
+
+  bool accel = false;
+
+  for (int i = 0; i < size; i++) {
     if (distanceMeasurements[i] <= threshold) {
       return false; // As soon as one measurement is not above the threshold, return false
     }
