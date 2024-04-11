@@ -136,27 +136,31 @@ void loop()
   duration = pulseIn(echoPin, HIGH);
 
   distanceCm = duration * 0.034 / 2;
+ 
 
   
 
   if (distanceCm < 100 and distanceCm > 20){
 
-    distanceMeasurements[index] = (distanceCm, abs(g.acceleration.z));
+    distanceMeasurements[index] = distanceCm;
     index = (index + 1) % 5;
 
   }
 
   distanceInch = duration * 0.0133 / 2;
   Serial.print("Distance (cm):");
+  
    
 
 
   float avgDistance = average(distanceMeasurements);
 
+  Serial.println(avgDistance);
+
   baseLineAvg[baseIndex] = avgDistance;
   baseIndex = (baseIndex + 1) % size;
 
-  Serial.println(avgDistance);
+  
 
 
   //50
