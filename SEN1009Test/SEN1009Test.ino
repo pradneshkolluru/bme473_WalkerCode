@@ -183,62 +183,50 @@ void loop()
     digitalWrite(ledPin3, LOW);   // Turn off LED 2
 
   }
-
-  /*
-  Serial.print("Infrared Switch Status:");
-  Serial.println(!digitalRead(InfraredSensorPin),BIN);
-  if (!digitalRead(InfraredSensorPin) == LOW) {
-    delay(00);
-    if (!digitalRead(InfraredSensorPin) == LOW) {
-    tone(buzzer, 1000);
-    delay(50);
-    noTone(buzzer);
-  }
-  }
-  */
   
-  // bool infraredSensorState = digitalRead(InfraredSensorPin);
+  
+  bool infraredSensorState = digitalRead(InfraredSensorPin);
 
-  // // Print the sensor state (for debugging)
-  // Serial.println(!infraredSensorState, BIN);
+  // Print the sensor state (for debugging)
+  Serial.println(!infraredSensorState, BIN);
 
-  // if (infraredSensorState == LOW) {
-  //   // User is in frame
-  //   userInFrame = true;
-  //   userAbsenceStartTime = 0;  // Reset the absence timer
-  //   noTone(buzzer);
-  // } else {
-  //   // User is not in frame
-  //   if (userInFrame) {
-  //     // Check if the absence timer is started
-  //     if (userAbsenceStartTime == 0) {
-  //       userAbsenceStartTime = millis();  // Start the absence timer
-  //     } else {
-  //       // Check if the absence duration has exceeded the threshold
-  //       if (millis() - userAbsenceStartTime >= userAbsenceThreshold) {
-  //         // Notify user absence
-  //         tone(buzzer, 1000);
-  //         delay(50);
-  //         noTone(buzzer);
-  //         Serial.println("User is out of position");
-  //         digitalWrite(ledPin1, LOW);  // Turn on LED 1
-  //         digitalWrite(ledPin2, HIGH);   // Turn off LED 2
-  //         digitalWrite(ledPin3, LOW);   // Turn off LED 3
+  if (infraredSensorState == LOW) {
+    // User is in frame
+    userInFrame = true;
+    userAbsenceStartTime = 0;  // Reset the absence timer
+    noTone(buzzer);
+  } else {
+    // User is not in frame
+    if (userInFrame) {
+      // Check if the absence timer is started
+      if (userAbsenceStartTime == 0) {
+        userAbsenceStartTime = millis();  // Start the absence timer
+      } else {
+        // Check if the absence duration has exceeded the threshold
+        if (millis() - userAbsenceStartTime >= userAbsenceThreshold) {
+          // Notify user absence
+          tone(buzzer, 1000);
+          delay(50);
+          noTone(buzzer);
+          Serial.println("User is out of position");
+          digitalWrite(ledPin1, LOW);  // Turn on LED 1
+          digitalWrite(ledPin2, HIGH);   // Turn off LED 2
+          digitalWrite(ledPin3, LOW);   // Turn off LED 3
 
-  //         userInFrame = false;
-  //       }
-  //     }
-  //   } else {
-  //     // User is still not in frame
-  //     tone(buzzer, 1000);
-  //     delay(50);
-  //     noTone(buzzer);
-  //     Serial.println("User is out of position");
-  //     digitalWrite(ledPin1, LOW);  // Turn on LED 1
-  //     digitalWrite(ledPin2, HIGH);   // Turn off LED 2
-  //     digitalWrite(ledPin3, LOW);   // Turn off LED 3
-  //   }
-  // }
+          userInFrame = false;
+        }
+      }
+    } else {
+      // User is still not in frame
+      tone(buzzer, 1000);
+      delay(50);
+      noTone(buzzer);
+      Serial.println("User is out of position");
+      digitalWrite(ledPin1, LOW);  // Turn on LED 1
+      digitalWrite(ledPin2, HIGH);   // Turn off LED 2
+      digitalWrite(ledPin3, LOW);   // Turn off LED 3
+    }
+  }
 
 
   
