@@ -4,8 +4,15 @@
 
 Adafruit_MPU6050 mpu;
 
-const int InfraredSensorPin = 4;//Connect the signal pin to the digital pin 4
-//const int LedDisp = 13;
+struct liftMetrics {
+  float height;
+  float accel;
+
+  // Constructor to initialize members
+  liftMetrics() : height(0), accel(0) {}
+};
+
+const int InfraredSensorPin = 4;//Connect the signal pin to the digital pin 
 const int buzzer = 12;
 const int trigPin = 9;
 const int echoPin = 10;
@@ -20,15 +27,13 @@ const int ledPin3 = 5;
 
 int size = 3;
 
-float* distanceMeasurements = new float[size];
+liftMetrics* distanceMeasurements = new liftMetrics[size];
+
+
 int index = 0;
 float* baseLineAvg = new float[size];
 int baseIndex = 0;
 
-
-
-// SEN0019 TIMER
-//const int LedDisp = 13;
 
 
 // Define the time threshold (in milliseconds) for user absence
@@ -47,7 +52,6 @@ void setup()
     
   Serial.println("Start!");
   pinMode(InfraredSensorPin,INPUT);
-  //pinMode(LedDisp,OUTPUT);
   pinMode(buzzer, OUTPUT);
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
@@ -56,7 +60,6 @@ void setup()
   pinMode(ledPin3, OUTPUT);
 
   for (int i = 0; i < size; i++) {
-    distanceMeasurements[i] = 0;
     baseLineAvg[i] = 0;
   }
 
@@ -126,8 +129,6 @@ void loop()
   digitalWrite(ledPin3, LOW);   // Turn off LED 2
   sensors_event_t a, g, temp;
   mpu.getEvent(&a, &g, &temp);
-  //if(digitalRead(InfraredSensorPin) == LOW)  digitalWrite(LedDisp,HIGH);
-  //else  digitalWrite(LedDisp,LOW);
   digitalWrite(trigPin, LOW);
   delayMicroseconds(2);
   digitalWrite(trigPin, HIGH);
@@ -142,7 +143,15 @@ void loop()
 
   if (distanceCm < 100 and distanceCm > 20){
 
-    distanceMeasurements[index] = distanceCm;
+
+    liftMetrics myData = distanceMeasurements[index];
+    myData.height = distanceCm;
+    myData.accel = abs(g.acceleration.z);
+
+    distanceMeasurements[index] = myData;
+
+
+
     index = (index + 1) % 5;
 
   }
@@ -151,8 +160,6 @@ void loop()
   Serial.print("Distance (cm):");
   
    
-
-
   float avgDistance = average(distanceMeasurements);
 
   Serial.println(avgDistance);
@@ -169,11 +176,11 @@ void loop()
 
   Serial.println("");
 
-  if (allAboveThreshold(38) && g.acceleration.z > abs(0.01)) {
+  // if (allAboveThreshold(38) && g.acceleration.z > abs(0.01)) {
 
   // if (distanceCm > 38 && distanceCm < 100 && g.acceleration.z > abs(0.01)) {
 
-  // if (allAboveThreshold(38)) {
+  if (allAboveThreshold(40)) {
     tone(buzzer, 1000);
     delay(50);
     noTone(buzzer);
@@ -251,11 +258,11 @@ void loop()
   delay(50);
 }
 
-float average (float * array)  // assuming array is int.
+float average (liftMetrics * array)  // assuming array is int.
 {
   long sum = 0L ;  // sum will be larger than an item, long for safety.
   for (int i = 0 ; i < size ; i++)
-    sum += array [i] ;
+    sum += array [i].height ;
   return  ((float) sum) / size ;  // average will be fractional, so float may be appropriate.
 }
 
@@ -264,9 +271,13 @@ bool allAboveThreshold(float threshold) {
   bool accel = false;
 
   for (int i = 0; i < size; i++) {
-    if (distanceMeasurements[i] <= threshold) {
+    if (distanceMeasurements[i].height <= threshold) {
       return false; // As soon as one measurement is not above the threshold, return false
     }
+    if (distanceMeasurements[i].accel > 0.03){
+      accel = true;
+    }
+
   }
-  return true; // All measurements are above the threshold
+  return true and accel; // All measurements are above the threshold
 }
